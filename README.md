@@ -6,10 +6,11 @@ It abstracts standard I/O redirection (`System.in`, `System.out`) and provides a
 
 ## ✨ Features
 
-- 🛡 **Zero Boilerplate**: Focus on your algorithm logic, not test setup.
+- 🛡 **Zero Boilerplate**: Use simple `@PSTest`, `@PSTestCase`, and `@PSTestCases` annotations. No inheritance, no setup methods.
 - ⏱ **Timeout Assertions**: Easily detect infinite loops or inefficient solutions with strict timeouts.
 - 📝 **I/O Redirection**: Automatically handles `System.in` and captures `System.out` for assertion.
-- 🧪 **Parameterized Testing**: Test multiple input/output cases in a single test class.
+- 🧪 **Flexible Test Organization**: Define each test case as a separate method, or group multiple cases in one method with `@PSTestCases`.
+- 🎯 **Better IDE Integration**: Each test case appears separately in test runners.
 - ☕ **Java 8 Compatible**: Works with Java 8 and above.
 
 ## 📦 Installation
@@ -32,7 +33,7 @@ repositories {
 
 ```groovy
 dependencies {
-  implementation 'com.github.dukcode:ps-utils:1.0.0'
+  implementation 'com.github.dukcode:ps-utils:1.1.0'
 }
 ```
 
@@ -45,7 +46,7 @@ repositories {
 }
 
 dependencies {
-implementation("com.github.dukcode:ps-utils:1.0.0")
+implementation("com.github.dukcode:ps-utils:1.1.0")
 }
 ```
 
@@ -62,11 +63,95 @@ implementation("com.github.dukcode:ps-utils:1.0.0")
 <dependency>
     <groupId>com.github.dukcode</groupId>
     <artifactId>ps-utils</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 ## 🚀 Usage
+
+There are two ways to use this library: **Annotation-based** (recommended) and **Classic**.
+
+### 🌟 Annotation-based Approach (Recommended)
+
+Use `@PSTest` and `@PSTestCase` annotations for minimal boilerplate.
+
+**1. Annotate Your Test Class**
+
+Use `@PSTest` to specify the solution class and timeout.
+
+**2. Define Test Cases**
+
+Use `@PSTestCase` to define input and expected output for each test case.
+
+#### 📝 Example Code
+
+Here is a full example of testing a solution named `Fence`:
+
+```java
+import org.dukcode.psutils.PSTest;
+import org.dukcode.psutils.PSTestCase;
+
+@PSTest(timeout = 1.0, solution = Fence.class)
+class FenceTest {
+
+  @PSTestCase(
+      input = """
+          3
+          7
+          7 1 5 9 6 7 3
+          """,
+      output = "20"
+  )
+  void testCase1() {}
+
+  @PSTestCase(
+      input = """
+          7
+          1 4 4 4 4 1 1
+          """,
+      output = "16"
+  )
+  void testCase2() {}
+}
+```
+
+**Benefits:**
+- ✨ No inheritance required
+- 🎯 Each test case is a separate method with clear naming
+- 📊 Better IDE integration and test reporting
+- 🔧 Less boilerplate code
+
+#### 🔢 Multiple Test Cases in One Method
+
+You can also use `@PSTestCases` to define multiple test cases in a single method:
+
+```java
+import org.dukcode.psutils.PSTest;
+import org.dukcode.psutils.PSTestCase;
+import org.dukcode.psutils.PSTestCases;
+
+@PSTest(timeout = 1.0, solution = Fence.class)
+class FenceTest {
+
+  @PSTestCases({
+      @PSTestCase(input = "3\n7\n7 1 5 9 6 7 3", output = "20"),
+      @PSTestCase(input = "7\n1 4 4 4 4 1 1", output = "16"),
+      @PSTestCase(input = "4\n1 4 2 3", output = "8")
+  })
+  void testAllCases() {}
+}
+```
+
+Each test case will be executed separately and displayed as:
+- `[1] input: 3\n7\n7 1 5 9 6 7 3`
+- `[2] input: 7\n1 4 4 4 4 1 1`
+- `[3] input: 4\n1 4 2 3`
+
+---
+
+### 🔧 Classic Approach (Inheritance-based)
+
+For those who prefer the traditional approach, you can extend `ProblemSolvingTest`.
 
 **1. Create a Test Class**
 
@@ -77,53 +162,41 @@ Extend `ProblemSolvingTest` and pass the timeout limit (in seconds) to the super
 - `setData()`: Provide test cases as a Stream<Arguments>. Each argument contains the **Input String** and the **Expected Output String**.
 - `runMain()`: Call your solution's main method.
 
-### 📝 Example Code
-
-Here is a full example of testing a solution named Fence.
+#### 📝 Example Code
 
 ```java
-import util.ProblemSolvingTest;
+import org.dukcode.psutils.ProblemSolvingTest;
 import org.junit.jupiter.params.provider.Arguments;
 import java.util.stream.Stream;
 
 class FenceTest extends ProblemSolvingTest {
 
-  // Set timeout to 1 second
   public FenceTest() {
-    super(1);
+    super(1);  // 1 second timeout
   }
 
   public static Stream<Arguments> setData() {
     return Stream.of(
       Arguments.of(
-        // Input Case 1
         """
         3
         7
         7 1 5 9 6 7 3
         """,
-        // Expected Output 1
-        """
-        20
-        """
+        "20"
       ),
       Arguments.of(
-        // Input Case 2
         """
         7
         1 4 4 4 4 1 1
         """,
-        // Expected Output 2
-        """
-        16
-        """
+        "16"
       )
     );
   }
 
   @Override
   protected void runMain() throws Exception {
-    // Run the main method of your solution class
     Fence.main(new String[]{});
   }
 }
@@ -133,10 +206,10 @@ class FenceTest extends ProblemSolvingTest {
 
 `Console`
 
-A wrapper around java.util.Scanner to simplify reading input in your solution code. It manages the Scanner lifecycle automatically when used with ProblemSolvingTest.
+A wrapper around java.util.Scanner to simplify reading input in your solution code. It manages the Scanner lifecycle automatically.
 
 ```java
-import util.Console;
+import org.dukcode.psutils.Console;
 
 public class MySolution {
   public static void main(String[] args) {
@@ -148,7 +221,7 @@ public class MySolution {
 
 `Assertions`
 
-Provides strict timeout assertions used internally by the test framework. You generally don't need to use this directly if you extend `ProblemSolvingTest`.
+Provides strict timeout assertions used internally by the test framework. You generally don't need to use this directly if you use `@PSTest` annotation or extend `ProblemSolvingTest`.
 
 ## 📝 License
 
