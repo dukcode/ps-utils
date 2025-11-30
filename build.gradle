@@ -20,3 +20,11 @@ java {
         languageVersion = JavaLanguageVersion.of(8)
     }
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
