@@ -73,7 +73,7 @@ public class PSTestCaseExecutor implements BeforeEachCallback, AfterEachCallback
   }
 
   /**
-   * 테스트 메서드 호출을 가로채서 문제 풀이 테스트 로직을 실행함.
+   * 테스트 템플릿 메서드 호출을 가로채서 문제 풀이 테스트 로직을 실행함.
    * @PSTestCases의 각 케이스를 실행함.
    *
    * @param invocation 테스트 메서드 호출
@@ -82,7 +82,7 @@ public class PSTestCaseExecutor implements BeforeEachCallback, AfterEachCallback
    * @throws Throwable 테스트 실행이 실패한 경우
    */
   @Override
-  public void interceptTestMethod(Invocation<Void> invocation,
+  public void interceptTestTemplateMethod(Invocation<Void> invocation,
       ReflectiveInvocationContext<Method> invocationContext,
       ExtensionContext extensionContext) throws Throwable {
 
